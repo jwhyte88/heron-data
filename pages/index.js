@@ -4,11 +4,24 @@ import { useEffect, useState } from 'react'
 
 export default function Home() {
 
+  const exampleTransaction = [
+    'GOOGLE *ADS12340929 cc@google.com US',
+    'BUSINESS ADVANCE CARD TRANSACTION BAT LINKEDIN SI NG 27SEP XXXX-XXXX-XXXX-XXXX',
+    'FACEBK *1111XX1XX1 IRELAND ON 29 JAN BDC',
+    '*Pending DEBIT PURCHASE Aug19 11:19a XXXX AT 11:19 UBER * PENDING',
+    'CARD PAYMENT TO MCDONALDS,12.99 GBP, RATE 1.00/GBP ON 06-02-2020',
+    'SALESFORCE CRM - SIN HTTPSNINJAFOR TN 08/06',
+    'DDBR xxXXX XXXXXXXXX ATLANTIC BEAC',
+    'GOOGLE *ADS12340929 cc@google.com US'
+  ]
+
   const heronDataAPI = 'https://app.herondata.io/api/merchants/extract'
-  const [inputValue, setInputValue] = useState('')
+  const [inputValue, setInputValue] = useState(exampleTransaction[0])
   const [searching, setSearching] = useState(false) 
   const [enrichedData, setEnrichedData] = useState([])
   const [displayResults, setDisplayResults] = useState(false)
+  const [displayError, setDisplayError] = useState(false)
+  const [displayErrorMsg, setDisplayErrorMsg] = useState('')
 
   useEffect(() => {
     if(searching) {
@@ -24,14 +37,19 @@ export default function Home() {
             return response.json();
           })
           .then((jsonObject) => {
-            if(jsonObject.description_clean.length > 0) {
+            setDisplayError(false)
+            if(jsonObject.description_clean && jsonObject.description_clean.length > 0) {
               enrichedData.unshift(jsonObject)
             }
             setDisplayResults(true)
             setSearching(false)
+            let currentExampleTransactionIndex = exampleTransaction.indexOf(inputValue);
+            let nextExampleTransactionIndex = (currentExampleTransactionIndex + 1) % exampleTransaction.length;
+            setInputValue(exampleTransaction[nextExampleTransactionIndex])
           })
           .catch((error) => {
-            document.write(error);
+            setDisplayError(true)
+            setDisplayErrorMsg(error)
             setSearching(false)
           });
       }
@@ -62,9 +80,19 @@ export default function Home() {
           </div>
           
           <form className="enrich-demo__input">
-            <input type='text' onChange={(e) => setInputValue(e.target.value)} />
-            <button onClick={() => searchData() }>Enrich</button>
+            <input type='text' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
+            <button onClick={() => searchData() }>
+              { searching ? 
+                <div class="dot-flashing" /> : "Enrich"
+              }
+            </button>
           </form>
+
+          {displayError &&
+            <div className="enrich-demo__error">
+              {displayErrorMsg}
+            </div>
+          }
           
           {displayResults && 
             <div className="enrich-demo__results">
