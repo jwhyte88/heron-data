@@ -24,8 +24,9 @@ export default function Home() {
             return response.json();
           })
           .then((jsonObject) => {
-            enrichedData.push(jsonObject)
-            console.log('\n\n\n enrichedData', enrichedData)
+            if(jsonObject.description_clean.length > 0) {
+              enrichedData.unshift(jsonObject)
+            }
             setDisplayResults(true)
             setSearching(false)
           })
