@@ -1,38 +1,52 @@
 import Head from 'next/head'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Home() {
 
+  const heronDataAPI = 'https://app.herondata.io/api/merchants/extract'
   const [inputValue, setInputValue] = useState('')
+  const [searching, setSearching] = useState(false) 
   const [enrichedData, setEnrichedData] = useState([])
+  const [displayResults, setDisplayResults] = useState(false)
 
-  console.log('\n\n\n\n\ enrichData', enrichedData)
-
-  const enrichData = async () => {
-    const response = await fetch('https://app.herondata.io/api/merchants/extract', {
-      method: 'POST',
-      body: JSON.stringify({ description: inputValue }),
-      headers: { 
-        'Content-Type': 'application/json'
+  useEffect(() => {
+    if(searching) {
+      const enrichData = async () => {
+        const response = await fetch(heronDataAPI, {
+          method: 'POST',
+          body: JSON.stringify({ description: inputValue }),
+          headers: { 
+            'Content-Type': 'application/json'
+          }
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((jsonObject) => {
+            enrichedData.push(jsonObject)
+            console.log('\n\n\n enrichedData', enrichedData)
+            setDisplayResults(true)
+            setSearching(false)
+          })
+          .catch((error) => {
+            document.write(error);
+            setSearching(false)
+          });
       }
-    })
-      .then((response) => {
-        return response.json();
-      })
-      .then((jsonObject) => {
-        console.log(jsonObject)
-        enrichedData.push(jsonObject)
-        console.log('\n\n\n\n\ enrichData', enrichedData)
-      })
-      .catch((error) => {
-        document.write(error);
-      });
+      enrichData()
+    }
+
+  }, [searching])
+
+  const searchData = async () => {
+    event.preventDefault()
+    setSearching(true)
   }
 
   return (
     <div className="container">
-      <Head>
+      <Head> 
         <title>Try Us - Heron Data</title>
         <meta name="description" content="Data enrichment by Heron Data" />
         <link rel="icon" href="/favicon.ico" />
@@ -40,18 +54,49 @@ export default function Home() {
 
       <main className="main">
         <div className="enrich-demo">
+          
           <div className="enrich-demo__intro">
             <h1>Try us</h1>
             <p>This is a free demo of our merchant enrichment product used to create a beautiful transaction feed. Enter a bank transaction or try our examples.</p>
-            <p>Example: SALESFORCE CRM - SIN HTTPSNINJAFOR TN 08/06</p>
           </div>
-          <div className="enrich-demo__input">
-            <input type='text' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
-            <button onClick={enrichData}>Enrich</button>
-          </div>
-          <div className="enrich-demo__results">
-            Results go here.
-          </div>
+          
+          <form className="enrich-demo__input">
+            <input type='text' onChange={(e) => setInputValue(e.target.value)} />
+            <button onClick={() => searchData() }>Enrich</button>
+          </form>
+          
+          {displayResults && 
+            <div className="enrich-demo__results">
+              {enrichedData && enrichedData.map((transaction) => (
+                <div className="transaction" key={transaction.description_clean}>
+                  <div className="merchant">
+
+                    { transaction.merchant && transaction.merchant.icon_url &&
+                      <div className="merchant__img">
+                        <Image src={transaction.merchant.icon_url} alt={transaction.merchant.name + " logo"} width={32} height={32} /> 
+                      </div>
+                    }
+                    <div className="merchant__text">
+                      { transaction.merchant && transaction.merchant.name &&
+                        <div className="merchant__title"> 
+                          {transaction.merchant.name} <a href={transaction.merchant.url}>{transaction.merchant.url}</a>
+                        </div>
+                      }
+                      { transaction.merchant && transaction.merchant.categories &&
+                        <div className="merchant__details">
+                          MCC: {transaction.merchant.categories[0].code} {transaction.merchant.categories[0].description}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div className="amount">
+                    $??
+                  </div>
+                </div>
+              ))}
+            </div>
+          }
+      
         </div>
       </main>
     </div>

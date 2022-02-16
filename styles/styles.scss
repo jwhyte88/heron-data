@@ -7,7 +7,7 @@ body {
 }
 
 a {
-  color: inherit;
+  color: #3898EC;
   text-decoration: none;
 }
 
@@ -73,5 +73,47 @@ a {
     border-radius: 6px 0 0 6px;
     border-right: none;
     padding: 8px 12px;
+  }
+}
+
+.enrich-demo__results {
+  width: 80%;
+}
+
+.transaction {
+  border-bottom: 1px solid #D4D4D4;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 16px 0;
+
+  .merchant {
+    display: flex;
+    flex-direction: row;
+
+    &__img {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+     img {
+      object-fit: contain;
+     }
+    }
+
+    &__text {
+      padding-left: 16px;
+    }
+    &__title {
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 24px;
+      color: #1c1335;
+    }
+  }
+
+  .amount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }
