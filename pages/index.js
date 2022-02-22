@@ -49,7 +49,7 @@ export default function Home() {
           })
           .catch((error) => {
             setDisplayError(true)
-            setDisplayErrorMsg(error)
+            setDisplayErrorMsg("Please try again.")
             setSearching(false)
           });
       }
@@ -83,7 +83,7 @@ export default function Home() {
             <input type='text' value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
             <button onClick={() => searchData() }>
               { searching ? 
-                <div class="dot-flashing" /> : "Enrich"
+                <div className="dot-flashing" /> : "Enrich"
               }
             </button>
           </form>
